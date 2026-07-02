@@ -196,7 +196,10 @@ function landing(error?: string): void {
     }
   });
   view().querySelectorAll<HTMLButtonElement>('[data-example]').forEach((btn) => {
-    btn.addEventListener('click', () => loadUrl(`examples/${btn.dataset.example}/apis.json`));
+    btn.addEventListener('click', () => {
+      history.replaceState(null, '', `?example=${encodeURIComponent(btn.dataset.example!)}`);
+      loadUrl(`examples/${btn.dataset.example}/apis.json`);
+    });
   });
 }
 
@@ -209,9 +212,17 @@ async function boot(): Promise<void> {
     return;
   }
 
-  const urlParam = new URLSearchParams(location.search).get('url');
+  const params = new URLSearchParams(location.search);
+  const urlParam = params.get('url');
   if (urlParam) {
     await loadUrl(urlParam);
+    return;
+  }
+
+  // ?example=<slug> — a dedicated, shareable URL for each bundled example.
+  const exampleParam = params.get('example');
+  if (exampleParam && EXAMPLES.some((ex) => ex.slug === exampleParam)) {
+    await loadUrl(`examples/${exampleParam}/apis.json`);
     return;
   }
 
