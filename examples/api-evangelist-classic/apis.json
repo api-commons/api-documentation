@@ -1,0 +1,102 @@
+{
+  "name": "API Evangelist",
+  "description": "The API Evangelist blog and its APIs — a classic APIs.json index in the 0.14 shape that powered the first generation of apis.io, using URL properties to point at the building blocks of each API.",
+  "image": "https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg",
+  "url": "https://apievangelist.com/apis.json",
+  "tags": [
+    "APIs",
+    "Blog",
+    "Analysis",
+    "API Evangelist"
+  ],
+  "created": "2014-05-27",
+  "modified": "2015-03-11",
+  "specificationVersion": "0.14",
+  "apis": [
+    {
+      "name": "API Evangelist Blog API",
+      "description": "Programmatic access to the API Evangelist blog — posts, titles, and links from sixteen years of API industry analysis.",
+      "humanURL": "https://apievangelist.com",
+      "baseURL": "https://api.apievangelist.com/blog",
+      "tags": [
+        "Blog",
+        "Content",
+        "News"
+      ],
+      "properties": [
+        {
+          "type": "Swagger",
+          "url": "https://api.apievangelist.com/blog/swagger.json"
+        },
+        {
+          "type": "Documentation",
+          "url": "https://api.apievangelist.com/docs/blog"
+        },
+        {
+          "type": "X-signup",
+          "url": "https://api.apievangelist.com/signup"
+        },
+        {
+          "type": "X-blog",
+          "url": "https://apievangelist.com/blog"
+        },
+        {
+          "type": "TermsOfService",
+          "url": "https://apievangelist.com/terms"
+        }
+      ],
+      "contact": [
+        {
+          "FN": "Kin Lane",
+          "email": "kin@apievangelist.com",
+          "X-twitter": "apievangelist"
+        }
+      ]
+    },
+    {
+      "name": "API Evangelist Analysis API",
+      "description": "The building blocks, companies, and tools tracked across the API space — the raw research behind the analysis.",
+      "humanURL": "https://apievangelist.com/analysis",
+      "baseURL": "https://api.apievangelist.com/analysis",
+      "tags": [
+        "Research",
+        "Companies",
+        "Building Blocks"
+      ],
+      "properties": [
+        {
+          "type": "Swagger",
+          "url": "https://api.apievangelist.com/analysis/swagger.json"
+        },
+        {
+          "type": "Documentation",
+          "url": "https://api.apievangelist.com/docs/analysis"
+        },
+        {
+          "type": "X-pricing",
+          "url": "https://api.apievangelist.com/pricing"
+        }
+      ],
+      "contact": [
+        {
+          "FN": "Kin Lane",
+          "email": "kin@apievangelist.com"
+        }
+      ]
+    }
+  ],
+  "include": [
+    {
+      "name": "APIs.io",
+      "url": "http://apis.io/apis.json"
+    }
+  ],
+  "maintainers": [
+    {
+      "FN": "Kin Lane",
+      "email": "kin@apievangelist.com",
+      "url": "https://apievangelist.com",
+      "organizationName": "API Evangelist"
+    }
+  ]
+}

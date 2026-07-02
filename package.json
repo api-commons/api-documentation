@@ -1,0 +1,22 @@
+{
+  "name": "api-documentation",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Standalone, beautiful documentation for any APIs.json — drop the viewer next to an apis.json (or bundle it into a single HTML file) and get rich, OpenAPI-quality docs for everything the file covers, including inline OpenAPI and Arazzo data properties. Supports APIs.json versions 0.11 through 0.21.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && node tools/standalone.mjs && node tools/build-examples.mjs",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "bundle": "node tools/bundle.mjs"
+  },
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "typescript": "^5.7.2",
+    "vite": "^5.4.11"
+  },
+  "dependencies": {
+    "yaml": "^2.6.1"
+  }
+}

@@ -1,0 +1,726 @@
+{
+  "aid": "local-food-business",
+  "name": "Local Food Business",
+  "description": "A working APIs.json bundle for a small local food producer or farm: only the services a market-and-wholesale food operation actually needs, each carrying only the operations that matter, described inline as OpenAPI, with the signup, login, documentation, and pricing properties an owner needs to get set up, plus Arazzo workflows for the most common single-provider and cross-provider tasks. This is the machine-readable companion to the API Evangelist bundle 'Running a Local Food Business on APIs.'",
+  "image": "https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg",
+  "url": "https://raw.githubusercontent.com/api-evangelist/papers/refs/heads/main/running-a-local-food-business-on-apis/apis.json",
+  "created": "2026-07-01",
+  "modified": "2026-07-01",
+  "specificationVersion": "0.21",
+  "type": "Blueprint",
+  "kind": "topic",
+  "visibility": "Public",
+  "position": "Consuming",
+  "access": "3rd-Party",
+  "tags": [
+    "Local Food",
+    "Small Business",
+    "Farm",
+    "Payments",
+    "Point of Sale",
+    "Accounting",
+    "Storefront",
+    "Delivery",
+    "Traceability",
+    "Newsletter"
+  ],
+  "maintainers": [
+    {
+      "FN": "Kin Lane",
+      "organizationName": "API Evangelist",
+      "email": "kin@apievangelist.com",
+      "url": "https://apievangelist.com"
+    }
+  ],
+  "apis": [
+    {
+      "aid": "square",
+      "name": "Square",
+      "description": "In-person and market-stall payments, catalog, orders, customers, and invoicing. The register you carry to the farmers market and the invoice you send a wholesale account.",
+      "image": "https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg",
+      "baseURL": "https://connect.squareup.com",
+      "humanURL": "https://developer.squareup.com",
+      "tags": ["Payments", "Point of Sale", "Invoicing", "Customers"],
+      "properties": [
+        { "type": "Signup", "name": "Create a Square account", "url": "https://squareup.com/signup" },
+        { "type": "Login", "name": "Developer console sign-in", "url": "https://developer.squareup.com/apps" },
+        { "type": "Documentation", "name": "Square API docs", "url": "https://developer.squareup.com/docs" },
+        { "type": "Authentication", "name": "OAuth & access tokens", "url": "https://developer.squareup.com/docs/build-basics/access-tokens" },
+        { "type": "Pricing", "name": "Square processing rates", "url": "https://squareup.com/us/en/payments/our-fees" },
+        {
+          "type": "OpenAPI",
+          "name": "Square operations a food producer needs",
+          "mediaType": "application/json",
+          "data": {
+            "openapi": "3.1.0",
+            "info": { "title": "Square (food-producer subset)", "version": "2026-05-19", "description": "Only the Square operations a market-and-wholesale food business needs: take a sale, capture a customer, invoice a wholesale account." },
+            "servers": [{ "url": "https://connect.squareup.com" }],
+            "components": {
+              "securitySchemes": { "oauth2": { "type": "http", "scheme": "bearer", "bearerFormat": "Square access token" } }
+            },
+            "security": [{ "oauth2": [] }],
+            "paths": {
+              "/v2/orders": {
+                "post": {
+                  "operationId": "CreateOrder",
+                  "summary": "Create an order (the itemized sale)",
+                  "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "properties": { "idempotency_key": { "type": "string" }, "order": { "type": "object", "properties": { "location_id": { "type": "string" }, "line_items": { "type": "array", "items": { "type": "object", "properties": { "name": { "type": "string" }, "quantity": { "type": "string" }, "base_price_money": { "type": "object", "properties": { "amount": { "type": "integer" }, "currency": { "type": "string" } } } } } } } } } } } } },
+                  "responses": { "200": { "description": "Order created", "content": { "application/json": { "schema": { "type": "object", "properties": { "order": { "type": "object", "properties": { "id": { "type": "string" }, "total_money": { "type": "object", "properties": { "amount": { "type": "integer" }, "currency": { "type": "string" } } } } } } } } } } }
+                }
+              },
+              "/v2/payments": {
+                "post": {
+                  "operationId": "CreatePayment",
+                  "summary": "Take a payment for an order",
+                  "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["source_id", "idempotency_key", "amount_money"], "properties": { "source_id": { "type": "string", "description": "Card nonce or saved card" }, "idempotency_key": { "type": "string" }, "order_id": { "type": "string" }, "amount_money": { "type": "object", "properties": { "amount": { "type": "integer" }, "currency": { "type": "string" } } } } } } } },
+                  "responses": { "200": { "description": "Payment taken", "content": { "application/json": { "schema": { "type": "object", "properties": { "payment": { "type": "object", "properties": { "id": { "type": "string" }, "status": { "type": "string" }, "amount_money": { "type": "object", "properties": { "amount": { "type": "integer" }, "currency": { "type": "string" } } } } } } } } } } }
+                }
+              },
+              "/v2/customers": {
+                "post": {
+                  "operationId": "CreateCustomer",
+                  "summary": "Capture a customer at the stall",
+                  "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "properties": { "given_name": { "type": "string" }, "family_name": { "type": "string" }, "email_address": { "type": "string" } } } } } },
+                  "responses": { "200": { "description": "Customer created", "content": { "application/json": { "schema": { "type": "object", "properties": { "customer": { "type": "object", "properties": { "id": { "type": "string" }, "email_address": { "type": "string" } } } } } } } } }
+                }
+              },
+              "/v2/invoices": {
+                "post": {
+                  "operationId": "CreateInvoice",
+                  "summary": "Invoice a wholesale account",
+                  "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "properties": { "idempotency_key": { "type": "string" }, "invoice": { "type": "object", "properties": { "order_id": { "type": "string" }, "primary_recipient": { "type": "object", "properties": { "customer_id": { "type": "string" } } }, "delivery_method": { "type": "string" } } } } } } } },
+                  "responses": { "200": { "description": "Invoice draft created", "content": { "application/json": { "schema": { "type": "object", "properties": { "invoice": { "type": "object", "properties": { "id": { "type": "string" }, "status": { "type": "string" } } } } } } } } }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "workflows": [
+        {
+          "type": "Arazzo",
+          "name": "Square — Ring up a market sale",
+          "description": "The single-provider core of a market day: build an itemized order, then take the payment against it.",
+          "mediaType": "application/yaml",
+          "data": {
+            "arazzo": "1.0.1",
+            "info": { "title": "Ring up a market sale", "version": "1.0.0", "description": "Create an order, then take a payment against it. Single provider (Square)." },
+            "sourceDescriptions": [{ "name": "square", "url": "https://developer.squareup.com/reference/square", "type": "openapi" }],
+            "workflows": [
+              {
+                "workflowId": "market-sale",
+                "summary": "Itemize a sale and take the payment",
+                "inputs": { "type": "object", "properties": { "location_id": { "type": "string" }, "line_items": { "type": "array" }, "source_id": { "type": "string" }, "amount": { "type": "integer" } } },
+                "steps": [
+                  {
+                    "stepId": "create-order",
+                    "operationId": "CreateOrder",
+                    "requestBody": { "payload": { "idempotency_key": "$inputs.location_id", "order": { "location_id": "$inputs.location_id", "line_items": "$inputs.line_items" } } },
+                    "successCriteria": [{ "condition": "$statusCode == 200" }],
+                    "outputs": { "order_id": "$response.body#/order/id", "amount": "$response.body#/order/total_money/amount" }
+                  },
+                  {
+                    "stepId": "take-payment",
+                    "operationId": "CreatePayment",
+                    "requestBody": { "payload": { "source_id": "$inputs.source_id", "idempotency_key": "$steps.create-order.outputs.order_id", "order_id": "$steps.create-order.outputs.order_id", "amount_money": { "amount": "$steps.create-order.outputs.amount", "currency": "USD" } } },
+                    "successCriteria": [{ "condition": "$statusCode == 200" }, { "condition": "$response.body#/payment/status == 'COMPLETED'" }],
+                    "outputs": { "payment_id": "$response.body#/payment/id" }
+                  }
+                ],
+                "outputs": { "payment_id": "$steps.take-payment.outputs.payment_id" }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "aid": "stripe",
+      "name": "Stripe",
+      "description": "Online payments for a food producer without a full storefront: a hosted payment link for a CSA share or a pre-order, and Checkout for a simple online cart.",
+      "image": "https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg",
+      "baseURL": "https://api.stripe.com",
+      "humanURL": "https://stripe.com/docs/api",
+      "tags": ["Payments", "Online", "Payment Links"],
+      "properties": [
+        { "type": "Signup", "name": "Create a Stripe account", "url": "https://dashboard.stripe.com/register" },
+        { "type": "Login", "name": "Stripe dashboard", "url": "https://dashboard.stripe.com/login" },
+        { "type": "Documentation", "name": "Stripe API reference", "url": "https://stripe.com/docs/api" },
+        { "type": "Authentication", "name": "API keys", "url": "https://stripe.com/docs/keys" },
+        { "type": "Pricing", "name": "Stripe pricing", "url": "https://stripe.com/pricing" },
+        {
+          "type": "OpenAPI",
+          "name": "Stripe operations for selling without a storefront",
+          "mediaType": "application/json",
+          "data": {
+            "openapi": "3.1.0",
+            "info": { "title": "Stripe (food-producer subset)", "version": "2024-06-20", "description": "Sell a product with a shareable link: create a product and price, then a payment link." },
+            "servers": [{ "url": "https://api.stripe.com" }],
+            "components": { "securitySchemes": { "bearer": { "type": "http", "scheme": "bearer", "bearerFormat": "Stripe secret key" } } },
+            "security": [{ "bearer": [] }],
+            "paths": {
+              "/v1/products": {
+                "post": {
+                  "operationId": "CreateProduct",
+                  "summary": "Create a product (a CSA share, a jar, a case)",
+                  "requestBody": { "required": true, "content": { "application/x-www-form-urlencoded": { "schema": { "type": "object", "required": ["name"], "properties": { "name": { "type": "string" }, "description": { "type": "string" } } } } } },
+                  "responses": { "200": { "description": "Product created", "content": { "application/json": { "schema": { "type": "object", "properties": { "id": { "type": "string" } } } } } } }
+                }
+              },
+              "/v1/prices": {
+                "post": {
+                  "operationId": "CreatePrice",
+                  "summary": "Set the price for a product",
+                  "requestBody": { "required": true, "content": { "application/x-www-form-urlencoded": { "schema": { "type": "object", "required": ["product", "unit_amount", "currency"], "properties": { "product": { "type": "string" }, "unit_amount": { "type": "integer" }, "currency": { "type": "string" } } } } } },
+                  "responses": { "200": { "description": "Price created", "content": { "application/json": { "schema": { "type": "object", "properties": { "id": { "type": "string" } } } } } } }
+                }
+              },
+              "/v1/payment_links": {
+                "post": {
+                  "operationId": "CreatePaymentLink",
+                  "summary": "Create a shareable payment link",
+                  "requestBody": { "required": true, "content": { "application/x-www-form-urlencoded": { "schema": { "type": "object", "required": ["line_items"], "properties": { "line_items[0][price]": { "type": "string" }, "line_items[0][quantity]": { "type": "integer" } } } } } },
+                  "responses": { "200": { "description": "Payment link created", "content": { "application/json": { "schema": { "type": "object", "properties": { "id": { "type": "string" }, "url": { "type": "string" } } } } } } }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "workflows": [
+        {
+          "type": "Arazzo",
+          "name": "Stripe — Publish a pre-order link",
+          "description": "Stand up something sellable online in three calls: product, price, shareable payment link you can drop in a newsletter or on a QR code.",
+          "mediaType": "application/yaml",
+          "data": {
+            "arazzo": "1.0.1",
+            "info": { "title": "Publish a pre-order link", "version": "1.0.0", "description": "Create a product, a price, and a payment link. Single provider (Stripe)." },
+            "sourceDescriptions": [{ "name": "stripe", "url": "https://raw.githubusercontent.com/stripe/openapi/master/openapi/spec3.json", "type": "openapi" }],
+            "workflows": [
+              {
+                "workflowId": "publish-pre-order-link",
+                "summary": "Product to price to shareable link",
+                "inputs": { "type": "object", "properties": { "name": { "type": "string" }, "unit_amount": { "type": "integer" } } },
+                "steps": [
+                  { "stepId": "create-product", "operationId": "CreateProduct", "requestBody": { "payload": { "name": "$inputs.name" } }, "successCriteria": [{ "condition": "$statusCode == 200" }], "outputs": { "product_id": "$response.body#/id" } },
+                  { "stepId": "create-price", "operationId": "CreatePrice", "requestBody": { "payload": { "product": "$steps.create-product.outputs.product_id", "unit_amount": "$inputs.unit_amount", "currency": "usd" } }, "successCriteria": [{ "condition": "$statusCode == 200" }], "outputs": { "price_id": "$response.body#/id" } },
+                  { "stepId": "create-link", "operationId": "CreatePaymentLink", "requestBody": { "payload": { "line_items[0][price]": "$steps.create-price.outputs.price_id", "line_items[0][quantity]": 1 } }, "successCriteria": [{ "condition": "$statusCode == 200" }], "outputs": { "link_url": "$response.body#/url" } }
+                ],
+                "outputs": { "link_url": "$steps.create-link.outputs.link_url" }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "aid": "quickbooks",
+      "name": "QuickBooks Online",
+      "description": "The books: record income from a market day, invoice wholesale accounts, and keep customers in sync so tax time is not a shoebox of receipts. (Wave is a free alternative for the same job.)",
+      "image": "https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg",
+      "baseURL": "https://quickbooks.api.intuit.com",
+      "humanURL": "https://developer.intuit.com/app/developer/qbo/docs/develop",
+      "tags": ["Accounting", "Invoicing", "Bookkeeping", "Small Business"],
+      "properties": [
+        { "type": "Signup", "name": "QuickBooks Online sign-up", "url": "https://quickbooks.intuit.com/pricing/" },
+        { "type": "Login", "name": "Intuit developer sign-in", "url": "https://developer.intuit.com/app/developer/homepage" },
+        { "type": "Documentation", "name": "Accounting API docs", "url": "https://developer.intuit.com/app/developer/qbo/docs/api/accounting/all-entities/account" },
+        { "type": "Authentication", "name": "OAuth 2.0", "url": "https://developer.intuit.com/app/developer/qbo/docs/develop/authentication-and-authorization/oauth-2.0" },
+        { "type": "Pricing", "name": "QuickBooks Online pricing", "url": "https://quickbooks.intuit.com/pricing/" },
+        {
+          "type": "OpenAPI",
+          "name": "QuickBooks operations for booking food-business income",
+          "mediaType": "application/json",
+          "data": {
+            "openapi": "3.1.0",
+            "info": { "title": "QuickBooks Online (food-producer subset)", "version": "v3", "description": "Record income from a market day and invoice a wholesale account." },
+            "servers": [{ "url": "https://quickbooks.api.intuit.com" }],
+            "components": { "securitySchemes": { "oauth2": { "type": "http", "scheme": "bearer", "bearerFormat": "Intuit OAuth 2.0 access token" } } },
+            "security": [{ "oauth2": [] }],
+            "paths": {
+              "/v3/company/{realmId}/salesreceipt": {
+                "post": {
+                  "operationId": "CreateSalesReceipt",
+                  "summary": "Record a cash/market sale as income",
+                  "parameters": [{ "name": "realmId", "in": "path", "required": true, "schema": { "type": "string" } }],
+                  "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "properties": { "Line": { "type": "array", "items": { "type": "object", "properties": { "Amount": { "type": "number" }, "DetailType": { "type": "string" } } } }, "CustomerRef": { "type": "object", "properties": { "value": { "type": "string" } } } } } } } },
+                  "responses": { "200": { "description": "Sales receipt recorded", "content": { "application/json": { "schema": { "type": "object", "properties": { "SalesReceipt": { "type": "object", "properties": { "Id": { "type": "string" }, "TotalAmt": { "type": "number" } } } } } } } } }
+                }
+              },
+              "/v3/company/{realmId}/invoice": {
+                "post": {
+                  "operationId": "CreateInvoice",
+                  "summary": "Invoice a wholesale account",
+                  "parameters": [{ "name": "realmId", "in": "path", "required": true, "schema": { "type": "string" } }],
+                  "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "properties": { "Line": { "type": "array" }, "CustomerRef": { "type": "object", "properties": { "value": { "type": "string" } } } } } } } },
+                  "responses": { "200": { "description": "Invoice created", "content": { "application/json": { "schema": { "type": "object", "properties": { "Invoice": { "type": "object", "properties": { "Id": { "type": "string" }, "TotalAmt": { "type": "number" } } } } } } } } }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "aid": "shopify",
+      "name": "Shopify",
+      "description": "The online store when the operation outgrows a payment link: list products, take orders, and hand them off to fulfillment. Represented here with the Admin REST operations a small producer touches.",
+      "image": "https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg",
+      "baseURL": "https://your-store.myshopify.com/admin/api/2024-10",
+      "humanURL": "https://shopify.dev/docs/api/admin-rest",
+      "tags": ["Storefront", "E-Commerce", "Orders", "Products"],
+      "properties": [
+        { "type": "Signup", "name": "Start a Shopify store", "url": "https://www.shopify.com/free-trial" },
+        { "type": "Login", "name": "Shopify admin sign-in", "url": "https://www.shopify.com/login" },
+        { "type": "Documentation", "name": "Admin REST API docs", "url": "https://shopify.dev/docs/api/admin-rest" },
+        { "type": "Authentication", "name": "Admin API access tokens", "url": "https://shopify.dev/docs/apps/auth/admin-app-access-tokens" },
+        { "type": "Pricing", "name": "Shopify plans", "url": "https://www.shopify.com/pricing" },
+        {
+          "type": "OpenAPI",
+          "name": "Shopify operations for listing and fulfilling",
+          "mediaType": "application/json",
+          "data": {
+            "openapi": "3.1.0",
+            "info": { "title": "Shopify Admin (food-producer subset)", "version": "2024-10", "description": "List a product and read new orders for fulfillment." },
+            "servers": [{ "url": "https://your-store.myshopify.com/admin/api/2024-10" }],
+            "components": { "securitySchemes": { "token": { "type": "apiKey", "in": "header", "name": "X-Shopify-Access-Token" } } },
+            "security": [{ "token": [] }],
+            "paths": {
+              "/products.json": {
+                "post": {
+                  "operationId": "CreateProduct",
+                  "summary": "List a new product (e.g. a finished batch)",
+                  "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "properties": { "product": { "type": "object", "properties": { "title": { "type": "string" }, "body_html": { "type": "string" }, "vendor": { "type": "string" }, "product_type": { "type": "string" }, "tags": { "type": "string" } } } } } } } },
+                  "responses": { "201": { "description": "Product created", "content": { "application/json": { "schema": { "type": "object", "properties": { "product": { "type": "object", "properties": { "id": { "type": "integer" }, "handle": { "type": "string" } } } } } } } } }
+                }
+              },
+              "/orders.json": {
+                "get": {
+                  "operationId": "ListOrders",
+                  "summary": "Read new orders to fulfill",
+                  "parameters": [{ "name": "status", "in": "query", "schema": { "type": "string", "default": "open" } }, { "name": "financial_status", "in": "query", "schema": { "type": "string", "default": "paid" } }],
+                  "responses": { "200": { "description": "Orders", "content": { "application/json": { "schema": { "type": "object", "properties": { "orders": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "integer" }, "shipping_address": { "type": "object" }, "line_items": { "type": "array" } } } } } } } } } }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "aid": "mailchimp",
+      "name": "Mailchimp",
+      "description": "The newsletter that turns a market conversation into a repeat customer: add a subscriber and send a campaign. The storytelling channel a food brand lives or dies by.",
+      "image": "https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg",
+      "baseURL": "https://us1.api.mailchimp.com/3.0",
+      "humanURL": "https://mailchimp.com/developer/marketing/api/",
+      "tags": ["Newsletter", "Email Marketing", "Audience"],
+      "properties": [
+        { "type": "Signup", "name": "Create a Mailchimp account", "url": "https://login.mailchimp.com/signup/" },
+        { "type": "Login", "name": "Mailchimp sign-in", "url": "https://login.mailchimp.com/" },
+        { "type": "Documentation", "name": "Marketing API docs", "url": "https://mailchimp.com/developer/marketing/api/" },
+        { "type": "Authentication", "name": "API keys & OAuth", "url": "https://mailchimp.com/developer/marketing/guides/quick-start/" },
+        { "type": "Pricing", "name": "Mailchimp pricing", "url": "https://mailchimp.com/pricing/" },
+        {
+          "type": "OpenAPI",
+          "name": "Mailchimp operations for a producer newsletter",
+          "mediaType": "application/json",
+          "data": {
+            "openapi": "3.1.0",
+            "info": { "title": "Mailchimp Marketing (food-producer subset)", "version": "3.0", "description": "Add a subscriber and send a campaign." },
+            "servers": [{ "url": "https://us1.api.mailchimp.com/3.0" }],
+            "components": { "securitySchemes": { "basic": { "type": "http", "scheme": "basic", "description": "Any username + API key as password" } } },
+            "security": [{ "basic": [] }],
+            "paths": {
+              "/lists/{list_id}/members": {
+                "post": {
+                  "operationId": "AddListMember",
+                  "summary": "Add a subscriber to your audience",
+                  "parameters": [{ "name": "list_id", "in": "path", "required": true, "schema": { "type": "string" } }],
+                  "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["email_address", "status"], "properties": { "email_address": { "type": "string" }, "status": { "type": "string", "enum": ["subscribed", "pending"] }, "merge_fields": { "type": "object" } } } } } },
+                  "responses": { "200": { "description": "Member added", "content": { "application/json": { "schema": { "type": "object", "properties": { "id": { "type": "string" }, "email_address": { "type": "string" } } } } } } }
+                }
+              },
+              "/campaigns": {
+                "post": {
+                  "operationId": "CreateCampaign",
+                  "summary": "Create a newsletter campaign",
+                  "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "properties": { "type": { "type": "string", "default": "regular" }, "recipients": { "type": "object", "properties": { "list_id": { "type": "string" } } }, "settings": { "type": "object", "properties": { "subject_line": { "type": "string" }, "from_name": { "type": "string" }, "reply_to": { "type": "string" } } } } } } } },
+                  "responses": { "200": { "description": "Campaign created", "content": { "application/json": { "schema": { "type": "object", "properties": { "id": { "type": "string" } } } } } } }
+                }
+              },
+              "/campaigns/{campaign_id}/actions/send": {
+                "post": {
+                  "operationId": "SendCampaign",
+                  "summary": "Send the campaign",
+                  "parameters": [{ "name": "campaign_id", "in": "path", "required": true, "schema": { "type": "string" } }],
+                  "responses": { "204": { "description": "Campaign queued to send" } }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "workflows": [
+        {
+          "type": "Arazzo",
+          "name": "Mailchimp — Send this week's newsletter",
+          "description": "Create the campaign against your audience and send it. Single provider (Mailchimp).",
+          "mediaType": "application/yaml",
+          "data": {
+            "arazzo": "1.0.1",
+            "info": { "title": "Send this week's newsletter", "version": "1.0.0", "description": "Create a campaign and send it. Single provider (Mailchimp)." },
+            "sourceDescriptions": [{ "name": "mailchimp", "url": "https://mailchimp.com/developer/marketing/api/", "type": "openapi" }],
+            "workflows": [
+              {
+                "workflowId": "send-newsletter",
+                "summary": "Create and send a campaign",
+                "inputs": { "type": "object", "properties": { "list_id": { "type": "string" }, "subject_line": { "type": "string" }, "from_name": { "type": "string" }, "reply_to": { "type": "string" } } },
+                "steps": [
+                  { "stepId": "create-campaign", "operationId": "CreateCampaign", "requestBody": { "payload": { "type": "regular", "recipients": { "list_id": "$inputs.list_id" }, "settings": { "subject_line": "$inputs.subject_line", "from_name": "$inputs.from_name", "reply_to": "$inputs.reply_to" } } }, "successCriteria": [{ "condition": "$statusCode == 200" }], "outputs": { "campaign_id": "$response.body#/id" } },
+                  { "stepId": "send", "operationId": "SendCampaign", "parameters": [{ "name": "campaign_id", "in": "path", "value": "$steps.create-campaign.outputs.campaign_id" }], "successCriteria": [{ "condition": "$statusCode == 204" }] }
+                ],
+                "outputs": { "campaign_id": "$steps.create-campaign.outputs.campaign_id" }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "aid": "uber-direct",
+      "name": "Uber Direct",
+      "description": "Local, same-day courier delivery for a market or online order without owning a van: quote a delivery, then book it. The bridge from 'they came to my stall' to 'I brought it to them.'",
+      "image": "https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg",
+      "baseURL": "https://api.uber.com/v1",
+      "humanURL": "https://developer.uber.com/docs/deliveries/overview",
+      "tags": ["Delivery", "Courier", "Logistics", "Fulfillment"],
+      "properties": [
+        { "type": "Signup", "name": "Uber Direct sign-up", "url": "https://www.uber.com/us/en/deliver/direct/" },
+        { "type": "Login", "name": "Uber developer dashboard", "url": "https://developer.uber.com/dashboard" },
+        { "type": "Documentation", "name": "Uber Direct docs", "url": "https://developer.uber.com/docs/deliveries/overview" },
+        { "type": "Authentication", "name": "OAuth authentication", "url": "https://developer.uber.com/docs/deliveries/authentication" },
+        { "type": "Pricing", "name": "Uber Direct pricing", "url": "https://www.uber.com/us/en/deliver/direct/pricing/" },
+        {
+          "type": "OpenAPI",
+          "name": "Uber Direct operations for local delivery",
+          "mediaType": "application/json",
+          "data": {
+            "openapi": "3.1.0",
+            "info": { "title": "Uber Direct (food-producer subset)", "version": "v1", "description": "Quote a delivery, then create it." },
+            "servers": [{ "url": "https://api.uber.com/v1" }],
+            "components": { "securitySchemes": { "oauth2": { "type": "http", "scheme": "bearer", "bearerFormat": "Uber OAuth token" } } },
+            "security": [{ "oauth2": [] }],
+            "paths": {
+              "/customers/{customer_id}/delivery_quotes": {
+                "post": {
+                  "operationId": "CreateQuote",
+                  "summary": "Quote a delivery between two addresses",
+                  "parameters": [{ "name": "customer_id", "in": "path", "required": true, "schema": { "type": "string" } }],
+                  "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["pickup_address", "dropoff_address"], "properties": { "pickup_address": { "type": "string" }, "dropoff_address": { "type": "string" } } } } } },
+                  "responses": { "200": { "description": "Quote", "content": { "application/json": { "schema": { "type": "object", "properties": { "id": { "type": "string" }, "fee": { "type": "integer" }, "currency": { "type": "string" } } } } } } }
+                }
+              },
+              "/customers/{customer_id}/deliveries": {
+                "post": {
+                  "operationId": "CreateDelivery",
+                  "summary": "Book the delivery",
+                  "parameters": [{ "name": "customer_id", "in": "path", "required": true, "schema": { "type": "string" } }],
+                  "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["quote_id", "pickup_address", "dropoff_address", "manifest_items"], "properties": { "quote_id": { "type": "string" }, "pickup_address": { "type": "string" }, "dropoff_address": { "type": "string" }, "pickup_name": { "type": "string" }, "dropoff_name": { "type": "string" }, "manifest_items": { "type": "array" } } } } } },
+                  "responses": { "200": { "description": "Delivery created", "content": { "application/json": { "schema": { "type": "object", "properties": { "id": { "type": "string" }, "tracking_url": { "type": "string" }, "status": { "type": "string" } } } } } } }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "workflows": [
+        {
+          "type": "Arazzo",
+          "name": "Uber Direct — Quote and book a local delivery",
+          "description": "Quote a courier run between two addresses, then book it against the quote. Single provider (Uber Direct).",
+          "mediaType": "application/yaml",
+          "data": {
+            "arazzo": "1.0.1",
+            "info": { "title": "Quote and book a local delivery", "version": "1.0.0", "description": "Quote a delivery, then create it. Single provider (Uber Direct)." },
+            "sourceDescriptions": [{ "name": "uber-direct", "url": "https://developer.uber.com/docs/deliveries/overview", "type": "openapi" }],
+            "workflows": [
+              {
+                "workflowId": "quote-and-deliver",
+                "summary": "Quote then book",
+                "inputs": { "type": "object", "properties": { "customer_id": { "type": "string" }, "pickup_address": { "type": "string" }, "dropoff_address": { "type": "string" }, "manifest_items": { "type": "array" } } },
+                "steps": [
+                  { "stepId": "quote", "operationId": "CreateQuote", "parameters": [{ "name": "customer_id", "in": "path", "value": "$inputs.customer_id" }], "requestBody": { "payload": { "pickup_address": "$inputs.pickup_address", "dropoff_address": "$inputs.dropoff_address" } }, "successCriteria": [{ "condition": "$statusCode == 200" }], "outputs": { "quote_id": "$response.body#/id" } },
+                  { "stepId": "book", "operationId": "CreateDelivery", "parameters": [{ "name": "customer_id", "in": "path", "value": "$inputs.customer_id" }], "requestBody": { "payload": { "quote_id": "$steps.quote.outputs.quote_id", "pickup_address": "$inputs.pickup_address", "dropoff_address": "$inputs.dropoff_address", "manifest_items": "$inputs.manifest_items" } }, "successCriteria": [{ "condition": "$statusCode == 200" }], "outputs": { "tracking_url": "$response.body#/tracking_url" } }
+                ],
+                "outputs": { "tracking_url": "$steps.book.outputs.tracking_url" }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "aid": "usda-local-food",
+      "name": "USDA Local Food Directories",
+      "description": "Public USDA data for finding — and getting listed among — the farmers markets, food hubs, CSAs, and on-farm markets a small producer sells through. The channel map for the business.",
+      "image": "https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg",
+      "baseURL": "https://www.usdalocalfoodportal.com",
+      "humanURL": "https://www.usdalocalfoodportal.com/fe/datasharing/",
+      "tags": ["Local Food", "Farmers Markets", "CSA", "Food Hubs", "Open Data"],
+      "properties": [
+        { "type": "Signup", "name": "Request a data-sharing API key", "url": "https://www.usdalocalfoodportal.com/fe/datasharing/" },
+        { "type": "Documentation", "name": "Local Food Portal API docs", "url": "https://www.usdalocalfoodportal.com/fe/datasharing/" },
+        {
+          "type": "OpenAPI",
+          "name": "USDA operations for finding local sales channels",
+          "mediaType": "application/json",
+          "data": {
+            "openapi": "3.1.0",
+            "info": { "title": "USDA Local Food Directories (subset)", "version": "1.0", "description": "Find farmers markets and CSAs near a ZIP." },
+            "servers": [{ "url": "https://www.usdalocalfoodportal.com" }],
+            "components": { "securitySchemes": { "apiKey": { "type": "apiKey", "in": "query", "name": "apikey" } } },
+            "security": [{ "apiKey": [] }],
+            "paths": {
+              "/api/farmersmarket/": {
+                "get": {
+                  "operationId": "SearchFarmersMarkets",
+                  "summary": "Find farmers markets near a ZIP",
+                  "parameters": [{ "name": "zip", "in": "query", "schema": { "type": "string" } }, { "name": "radius", "in": "query", "schema": { "type": "integer" } }],
+                  "responses": { "200": { "description": "Markets", "content": { "application/json": { "schema": { "type": "object", "properties": { "data": { "type": "array", "items": { "type": "object", "properties": { "listing_name": { "type": "string" }, "location_address": { "type": "string" } } } } } } } } } }
+                }
+              },
+              "/api/csa/": {
+                "get": {
+                  "operationId": "SearchCSA",
+                  "summary": "Find CSA operations near a ZIP",
+                  "parameters": [{ "name": "zip", "in": "query", "schema": { "type": "string" } }, { "name": "radius", "in": "query", "schema": { "type": "integer" } }],
+                  "responses": { "200": { "description": "CSAs", "content": { "application/json": { "schema": { "type": "object", "properties": { "data": { "type": "array" } } } } } } }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "aid": "farmos",
+      "name": "farmOS",
+      "description": "Open-source, self-hostable farm records — assets, logs, and plans. The traceability substrate: log a harvest or a critical control point and own the data in your own instance, forever.",
+      "image": "https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg",
+      "baseURL": "https://your-farm.farmos.net/api",
+      "humanURL": "https://farmos.org/development/api/",
+      "tags": ["Agriculture", "Farm Records", "Traceability", "Open Source"],
+      "properties": [
+        { "type": "Signup", "name": "Host or get a farmOS instance", "url": "https://farmos.org/hosting/" },
+        { "type": "Documentation", "name": "farmOS API docs", "url": "https://farmos.org/development/api/" },
+        { "type": "Authentication", "name": "OAuth2 authentication", "url": "https://farmos.org/development/api/authentication/" },
+        { "type": "GitHubRepository", "name": "farmOS source", "url": "https://github.com/farmOS/farmOS" },
+        {
+          "type": "OpenAPI",
+          "name": "farmOS operations for harvest logging & traceability",
+          "mediaType": "application/json",
+          "data": {
+            "openapi": "3.1.0",
+            "info": { "title": "farmOS (food-producer subset)", "version": "2.x", "description": "Log a harvest and read plant assets — the traceability record behind a batch." },
+            "servers": [{ "url": "https://your-farm.farmos.net/api" }],
+            "components": { "securitySchemes": { "oauth2": { "type": "http", "scheme": "bearer", "bearerFormat": "farmOS OAuth2 token" } } },
+            "security": [{ "oauth2": [] }],
+            "paths": {
+              "/log/harvest": {
+                "post": {
+                  "operationId": "CreateHarvestLog",
+                  "summary": "Log a harvest (the origin record for a batch)",
+                  "requestBody": { "required": true, "content": { "application/vnd.api+json": { "schema": { "type": "object", "properties": { "data": { "type": "object", "properties": { "type": { "type": "string", "default": "log--harvest" }, "attributes": { "type": "object", "properties": { "name": { "type": "string" }, "timestamp": { "type": "string" }, "notes": { "type": "object" } } } } } } } } } },
+                  "responses": { "201": { "description": "Harvest logged", "content": { "application/vnd.api+json": { "schema": { "type": "object", "properties": { "data": { "type": "object", "properties": { "id": { "type": "string" } } } } } } } } }
+                }
+              },
+              "/asset/plant": {
+                "get": {
+                  "operationId": "ListPlantAssets",
+                  "summary": "List plant/crop assets",
+                  "responses": { "200": { "description": "Plant assets", "content": { "application/vnd.api+json": { "schema": { "type": "object", "properties": { "data": { "type": "array" } } } } } } }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "common": [
+    {
+      "type": "Arazzo",
+      "name": "Market day to the books (Square → QuickBooks)",
+      "description": "Cross-provider: take a payment at the market on Square, then record the income as a sales receipt in QuickBooks so the day is already booked before you drive home.",
+      "mediaType": "application/yaml",
+      "data": {
+        "arazzo": "1.0.1",
+        "info": { "title": "Market day to the books", "version": "1.0.0", "description": "Square payment recorded as QuickBooks income. Cross-provider." },
+        "sourceDescriptions": [
+          { "name": "square", "url": "https://developer.squareup.com/reference/square", "type": "openapi" },
+          { "name": "quickbooks", "url": "https://developer.intuit.com/app/developer/qbo/docs/api/accounting/all-entities/salesreceipt", "type": "openapi" }
+        ],
+        "workflows": [
+          {
+            "workflowId": "market-payment-to-books",
+            "summary": "Take a payment, then book it as income",
+            "inputs": { "type": "object", "properties": { "source_id": { "type": "string" }, "amount": { "type": "integer" }, "idempotency_key": { "type": "string" }, "realmId": { "type": "string" }, "customer_ref": { "type": "string" } } },
+            "steps": [
+              {
+                "stepId": "take-payment",
+                "description": "Square: take the market payment.",
+                "operationId": "square.CreatePayment",
+                "requestBody": { "payload": { "source_id": "$inputs.source_id", "idempotency_key": "$inputs.idempotency_key", "amount_money": { "amount": "$inputs.amount", "currency": "USD" } } },
+                "successCriteria": [{ "condition": "$statusCode == 200" }],
+                "outputs": { "amount": "$response.body#/payment/amount_money/amount", "payment_id": "$response.body#/payment/id" }
+              },
+              {
+                "stepId": "book-income",
+                "description": "QuickBooks: record it as a sales receipt (cents to dollars is the one honest transform here).",
+                "operationId": "quickbooks.CreateSalesReceipt",
+                "parameters": [{ "name": "realmId", "in": "path", "value": "$inputs.realmId" }],
+                "requestBody": { "payload": { "Line": [{ "Amount": "$steps.take-payment.outputs.amount", "DetailType": "SalesItemLineDetail" }], "CustomerRef": { "value": "$inputs.customer_ref" } } },
+                "successCriteria": [{ "condition": "$statusCode == 200" }],
+                "outputs": { "receipt_id": "$response.body#/SalesReceipt/Id" }
+              }
+            ],
+            "outputs": { "payment_id": "$steps.take-payment.outputs.payment_id", "receipt_id": "$steps.book-income.outputs.receipt_id" }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Arazzo",
+      "name": "Online order to local courier (Shopify → Uber Direct)",
+      "description": "Cross-provider: pull a paid online order from Shopify, then quote and book an Uber Direct courier to the customer's address. The 'I brought it to them' path.",
+      "mediaType": "application/yaml",
+      "data": {
+        "arazzo": "1.0.1",
+        "info": { "title": "Online order to local courier", "version": "1.0.0", "description": "Shopify order fulfilled by an Uber Direct delivery. Cross-provider." },
+        "sourceDescriptions": [
+          { "name": "shopify", "url": "https://shopify.dev/docs/api/admin-rest/latest/resources/order", "type": "openapi" },
+          { "name": "uber-direct", "url": "https://developer.uber.com/docs/deliveries/overview", "type": "openapi" }
+        ],
+        "workflows": [
+          {
+            "workflowId": "order-to-delivery",
+            "summary": "Read the newest paid order and book a courier for it",
+            "inputs": { "type": "object", "properties": { "customer_id": { "type": "string" }, "pickup_address": { "type": "string" } } },
+            "steps": [
+              {
+                "stepId": "get-orders",
+                "description": "Shopify: read open, paid orders awaiting fulfillment.",
+                "operationId": "shopify.ListOrders",
+                "parameters": [{ "name": "status", "in": "query", "value": "open" }, { "name": "financial_status", "in": "query", "value": "paid" }],
+                "successCriteria": [{ "condition": "$statusCode == 200" }],
+                "outputs": { "dropoff_address": "$response.body#/orders/0/shipping_address/address1", "order_id": "$response.body#/orders/0/id" }
+              },
+              {
+                "stepId": "quote",
+                "description": "Uber Direct: quote the run to the order's shipping address.",
+                "operationId": "uber-direct.CreateQuote",
+                "parameters": [{ "name": "customer_id", "in": "path", "value": "$inputs.customer_id" }],
+                "requestBody": { "payload": { "pickup_address": "$inputs.pickup_address", "dropoff_address": "$steps.get-orders.outputs.dropoff_address" } },
+                "successCriteria": [{ "condition": "$statusCode == 200" }],
+                "outputs": { "quote_id": "$response.body#/id" }
+              },
+              {
+                "stepId": "book",
+                "description": "Uber Direct: book the delivery against the quote.",
+                "operationId": "uber-direct.CreateDelivery",
+                "parameters": [{ "name": "customer_id", "in": "path", "value": "$inputs.customer_id" }],
+                "requestBody": { "payload": { "quote_id": "$steps.quote.outputs.quote_id", "pickup_address": "$inputs.pickup_address", "dropoff_address": "$steps.get-orders.outputs.dropoff_address", "manifest_items": [] } },
+                "successCriteria": [{ "condition": "$statusCode == 200" }],
+                "outputs": { "tracking_url": "$response.body#/tracking_url" }
+              }
+            ],
+            "outputs": { "tracking_url": "$steps.book.outputs.tracking_url" }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Arazzo",
+      "name": "Market customer to newsletter (Square → Mailchimp)",
+      "description": "Cross-provider: capture a customer at the stall on Square, then add them to your Mailchimp audience so the next market starts with an email, not a cold walk-by.",
+      "mediaType": "application/yaml",
+      "data": {
+        "arazzo": "1.0.1",
+        "info": { "title": "Market customer to newsletter", "version": "1.0.0", "description": "Square customer added to a Mailchimp audience. Cross-provider." },
+        "sourceDescriptions": [
+          { "name": "square", "url": "https://developer.squareup.com/reference/square", "type": "openapi" },
+          { "name": "mailchimp", "url": "https://mailchimp.com/developer/marketing/api/", "type": "openapi" }
+        ],
+        "workflows": [
+          {
+            "workflowId": "customer-to-newsletter",
+            "summary": "Capture a customer, then subscribe them",
+            "inputs": { "type": "object", "properties": { "given_name": { "type": "string" }, "family_name": { "type": "string" }, "email_address": { "type": "string" }, "list_id": { "type": "string" } } },
+            "steps": [
+              {
+                "stepId": "capture-customer",
+                "description": "Square: create the customer record at the stall.",
+                "operationId": "square.CreateCustomer",
+                "requestBody": { "payload": { "given_name": "$inputs.given_name", "family_name": "$inputs.family_name", "email_address": "$inputs.email_address" } },
+                "successCriteria": [{ "condition": "$statusCode == 200" }],
+                "outputs": { "email": "$response.body#/customer/email_address" }
+              },
+              {
+                "stepId": "subscribe",
+                "description": "Mailchimp: add them to the audience (double opt-in via status=pending is the honest default).",
+                "operationId": "mailchimp.AddListMember",
+                "parameters": [{ "name": "list_id", "in": "path", "value": "$inputs.list_id" }],
+                "requestBody": { "payload": { "email_address": "$steps.capture-customer.outputs.email", "status": "pending", "merge_fields": { "FNAME": "$inputs.given_name", "LNAME": "$inputs.family_name" } } },
+                "successCriteria": [{ "condition": "$statusCode == 200" }],
+                "outputs": { "member_id": "$response.body#/id" }
+              }
+            ],
+            "outputs": { "member_id": "$steps.subscribe.outputs.member_id" }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Arazzo",
+      "name": "Traceable batch to storefront listing (farmOS → Shopify)",
+      "description": "Cross-provider: log a harvest in farmOS as the origin record, then list the finished batch as a Shopify product that carries the batch back to that log. Traceability from soil to storefront.",
+      "mediaType": "application/yaml",
+      "data": {
+        "arazzo": "1.0.1",
+        "info": { "title": "Traceable batch to storefront listing", "version": "1.0.0", "description": "farmOS harvest log linked to a Shopify product listing. Cross-provider." },
+        "sourceDescriptions": [
+          { "name": "farmos", "url": "https://farmos.org/development/api/", "type": "openapi" },
+          { "name": "shopify", "url": "https://shopify.dev/docs/api/admin-rest/latest/resources/product", "type": "openapi" }
+        ],
+        "workflows": [
+          {
+            "workflowId": "harvest-to-listing",
+            "summary": "Log the harvest, then list the batch it became",
+            "inputs": { "type": "object", "properties": { "harvest_name": { "type": "string" }, "timestamp": { "type": "string" }, "product_title": { "type": "string" }, "body_html": { "type": "string" }, "vendor": { "type": "string" } } },
+            "steps": [
+              {
+                "stepId": "log-harvest",
+                "description": "farmOS: record the harvest as the origin of the batch.",
+                "operationId": "farmos.CreateHarvestLog",
+                "requestBody": { "payload": { "data": { "type": "log--harvest", "attributes": { "name": "$inputs.harvest_name", "timestamp": "$inputs.timestamp" } } } },
+                "successCriteria": [{ "condition": "$statusCode == 201" }],
+                "outputs": { "log_id": "$response.body#/data/id" }
+              },
+              {
+                "stepId": "list-product",
+                "description": "Shopify: list the finished batch, tagging it with the harvest log id so the listing is traceable to origin.",
+                "operationId": "shopify.CreateProduct",
+                "requestBody": { "payload": { "product": { "title": "$inputs.product_title", "body_html": "$inputs.body_html", "vendor": "$inputs.vendor", "product_type": "Food", "tags": "$steps.log-harvest.outputs.log_id" } } },
+                "successCriteria": [{ "condition": "$statusCode == 201" }],
+                "outputs": { "product_id": "$response.body#/product/id" }
+              }
+            ],
+            "outputs": { "log_id": "$steps.log-harvest.outputs.log_id", "product_id": "$steps.list-product.outputs.product_id" }
+          }
+        ]
+      }
+    }
+  ]
+}
