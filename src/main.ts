@@ -50,6 +50,7 @@ function shell(): void {
         <button class="engage-btn" id="engage-ae">Work with us</button>
       </nav>
     </header>
+    <div data-laneworks-ad="top-banner"></div>
     <div id="view"></div>`;
 
   document.getElementById('btn-open')!.addEventListener('click', () => {
