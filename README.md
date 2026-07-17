@@ -2,7 +2,7 @@
 
 **Standalone, portable documentation for any [APIs.json](https://apisjson.org).**
 
-Live at **[documentation.apicommons.org](https://documentation.apicommons.org)** — an [API Commons](https://apicommons.org) tool, alongside [API Discovery](https://discover.apicommons.org) and [API Reusability](https://reusability.apicommons.org).
+Live at **[documentation.apicommons.org](https://documentation.apicommons.org)** — an [API Commons](https://apicommons.org) tool.
 
 APIs.json indexes the APIs an organization or a bundle depends on — and since version 0.19 it can carry the artifacts themselves as inline `data` properties: full OpenAPI definitions, Arazzo workflows, prompts, and rules. This tool turns any APIs.json into rich, readable HTML documentation:
 
@@ -52,6 +52,17 @@ npm run dev        # local dev server
 npm run build      # dist/ + dist/apis-json-viewer.html + dist/examples/
 npm run typecheck
 ```
+
+## Part of API Commons
+
+An open, browser-first tool from **[API Commons](https://apicommons.org)** — free, no backend, your data stays in your browser. Browse the full set at **[apicommons.org/tools](https://apicommons.org/tools/)**.
+
+**Related tools**
+- [API Discovery](https://discovery.apicommons.org) — browser-first registry that composes the APIs.json this tool renders
+- [API Experience](https://experience.apicommons.org) — DX/AX layer + coverage scorecard
+- [API Reusability](https://reusability.apicommons.org) — score API reuse across an org
+- [API Validator](https://validator.apicommons.org) — lint OpenAPI/AsyncAPI/Arazzo/JSON Schema in-browser
+- [Model Library](https://library.apicommons.org) — versioned model library + drift/breaking-change detection
 
 ## License
 
